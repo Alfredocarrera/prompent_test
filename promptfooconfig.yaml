@@ -1,0 +1,57 @@
+description: 'Validación de plataforma educativa con Google AI Studio y prompts personalizados'
+
+# Apuntamos al archivo donde definimi mis prompt
+prompts:
+  - file://prompt.txt
+
+# Definimos el proveedor/modelo de Google AI Studio
+providers:
+  - id: google:gemini-1.5-flash
+    config:
+      temperature: 0.0  # Temperatura en 0 para respuestas consistente y exacta
+
+# Casos de prueba
+tests:
+  
+  # Caso 1: Duda técnica sobre programación
+  
+  - description: 'Caso 1: Duda técnica sobre un error en JavaScript'
+    vars:
+      mensaje: 'Hola, tengo un error "TypeError: Cannot read property of undefined" en mi código de React. ¿Alguien sabe cómo solucionarlo?'
+    assert:
+      # Assert 1: Validar que la respuesta sea un JSON válido
+      - type: is-json
+      # Assert 2: Evaluación con JavaScript para validar campos del JSON
+      - type: javascript
+        value: |
+          const res = JSON.parse(output);
+          return res.categoria === 'pregunta' && res.accion === 'publicar' && res.es_respetuoso === true;
+
+  
+  # Caso 2: Comentario ofensivo o intento de spam
+  
+  - description: 'Caso 2: Mensaje ofensivo o intento de spam hacia el profesor'
+    vars:
+      mensaje: 'Este profesor es un inútil y este curso no sirve para nada, váyanse a comprar tacos en Mr. Tacos.'
+    assert:
+      - type: is-json
+      # Assert 3: Validar que contenga valores específicos (sin importar mayúsculas/minúsculas)
+      - type: icontains
+        value: '"categoria": "inapropiado"'
+      - type: icontains
+        value: '"accion": "bloquear"'
+
+  
+  # Caso 3: Mensaje de agradecimiento al profesor
+  
+  - description: 'Caso 3: Agradecimiento al profesor por la lección'
+    vars:
+      mensaje: '¡Excelente explicación sobre los ciclos for! Me quedó todo super claro, muchas gracias Profe Alex y Profe Juan.'
+    assert:
+      - type: is-json
+      - type: icontains
+        value: '"categoria": "felicitacion"'
+      - type: javascript
+        value: |
+          const res = JSON.parse(output);
+          return res.accion === 'publicar' && res.es_respetuoso === true;
