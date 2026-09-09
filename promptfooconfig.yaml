@@ -2,13 +2,14 @@ description: 'Validación de plataforma educativa con Google AI Studio y prompts
 
 # Apuntamos al archivo donde definimi mis prompt
 prompts:
-  - file://prompt.txt
+  - file:/prompt.txt 
 
 # Definimos el proveedor/modelo de Google AI Studio
 providers:
   - id: google:gemini-1.5-flash
     config:
       temperature: 0.0  # Temperatura en 0 para respuestas consistente y exacta
+      responseMimeType: application/json  # Forzar que la respuesta sea en formato JSON
 
 # Casos de prueba
 tests:
